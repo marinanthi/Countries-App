@@ -4,6 +4,7 @@ import com.example.onboarding3.domain.Country;
 import com.example.onboarding3.services.RedisCacheService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -17,7 +18,6 @@ public class RedisCacheController {
 
     @GetMapping("/findByCapital/{capitalName}")
     public Country byCapital(@PathVariable String capitalName) {
-        System.out.println("Searching country based on capital...");
         return countriesService.getByCapital(capitalName);
     }
 }

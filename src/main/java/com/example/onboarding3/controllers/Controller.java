@@ -20,8 +20,8 @@ public class Controller {
     }
 
     @GetMapping("/country")
-    public Country byName(@RequestParam String country_name) {
+    public Country byName(@RequestParam String countryName) {
         System.out.println("Searching country based on name...");
-        return countriesService.findByName(country_name);
+        return countriesService.findByName(countryName);
     }
 }

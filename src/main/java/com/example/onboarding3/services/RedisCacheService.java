@@ -14,8 +14,8 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class RedisCacheService {
 
-    public CountriesRestClient restCountries;
-    public CacheManager cacheManager;
+    private final CountriesRestClient restCountries;
+    private final CacheManager cacheManager;
 
     public RedisCacheService(CountriesRestClient restCountries, CacheManager cacheManager) {
         this.restCountries = restCountries;
@@ -27,10 +27,9 @@ public class RedisCacheService {
         return restCountries.getByCapital(capital);
     }
 
-    @Scheduled(fixedDelay = 1000, timeUnit = TimeUnit.SECONDS)
+    @Scheduled(fixedDelay = 3, timeUnit = TimeUnit.MINUTES)
     void redisCleaner() {
         cacheManager.getCacheNames()
                 .forEach(cacheName -> cacheManager.getCache(cacheName).clear());
-        System.out.println("Cleaning Redis Cache...");
     }
 }
