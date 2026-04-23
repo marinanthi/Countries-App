@@ -2,9 +2,7 @@ package com.example.onboarding3.domain;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import jakarta.validation.constraints.NotBlank;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -19,9 +17,11 @@ import java.io.Serializable;
         "currencyName"
 })
 
+@Data
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 @Document(collection = "KafkaCountries")
 public class KafkaCountries extends Country implements Serializable {
     @Id
@@ -37,9 +37,5 @@ public class KafkaCountries extends Country implements Serializable {
         this.continent = continent;
         this.officialLanguage = officialLanguage;
         this.currencyName = currencyName;
-    }
-
-    public String toString() {
-        return "Country Name: " + countryName + ", Country Code: " + countryCode + ", Capital: " + capital + ", Continent: " + continent + ", Official Language: " + officialLanguage + ", Currency Name: " + currencyName;
     }
 }

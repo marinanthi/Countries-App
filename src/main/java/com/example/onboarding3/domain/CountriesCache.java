@@ -1,9 +1,7 @@
 package com.example.onboarding3.domain;
 
 import jakarta.validation.constraints.NotBlank;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -21,6 +19,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
         "currencyName"
 })
 
+@Data
 @Getter
 @Setter
 @NoArgsConstructor
