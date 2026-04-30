@@ -5,6 +5,7 @@ import com.example.onboarding3.services.CountriesService;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+//@RequestMapping("/countries")
 public class Controller {
 
     private final CountriesService countriesService;

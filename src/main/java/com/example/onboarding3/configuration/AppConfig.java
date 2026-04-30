@@ -2,13 +2,9 @@ package com.example.onboarding3.configuration;
 
 import com.example.onboarding3.domain.Country;
 import org.apache.kafka.clients.admin.NewTopic;
-import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.springframework.cache.CacheManager;
-import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.kafka.config.TopicBuilder;
@@ -36,9 +32,10 @@ public class AppConfig {
     @Bean
     public NewTopic newTopic() {
         return TopicBuilder.name("new-topic")
-                .partitions(2)
+                .partitions(1)
                 .replicas(1)
-                .config("retension.ms", "10000")
+//                .config("retension.ms", "100000")
                 .build();
+
     }
 }

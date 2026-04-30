@@ -6,6 +6,7 @@ import static com.example.onboarding3.domain.CountriesFromApi.mapToCountry;
 import static org.junit.jupiter.api.Assertions.*;
 
 class CountriesFromApiTest {
+    // unit test
     @Test
     void testMapToCountry() {
         CountriesFromApi countriesFromApi = CountriesFromApi.builder()

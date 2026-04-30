@@ -1,10 +1,7 @@
 package com.example.onboarding3.domain;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 

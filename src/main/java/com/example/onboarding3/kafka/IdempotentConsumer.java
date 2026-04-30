@@ -40,12 +40,12 @@ public class IdempotentConsumer {
         String idempotencyKey = String.valueOf(record.offset());
         boolean absent = tryProcess(idempotencyKey);
 
-        if (absent) {
-            //     every 100ms poll messages from kafka
-            consumer.poll(Duration.ofMillis(100));
-            log.info("Received message from Kafka. Offset: {}", record.offset());
-        } else {
+        if (!absent) {
             log.info("Skipping duplicate message. Offset: {}", record.offset());
+        } else {
+            //     every 10ms poll messages from kafka
+            consumer.poll(Duration.ofMillis(10));
+            log.info("Received message from Kafka. Offset: {}", record.offset());
         }
     }
 

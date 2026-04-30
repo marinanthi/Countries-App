@@ -30,7 +30,7 @@ public class KafkaService {
         this.consumer = consumer;
     }
 
-//    first attempt
+    // producer
     @Transactional
     public void sendCountry(KafkaCountries country) {
         CompletableFuture<SendResult<String, Country>> future = kafka.send("countries-topic", country);
@@ -39,12 +39,12 @@ public class KafkaService {
                 log.error("Error sending message: {}", exception.getMessage());
             } else {
                 log.info("Message sent successfully. Offset: {}", result.getRecordMetadata().offset());
-
-                System.out.println(result.getProducerRecord().value());
+//                System.out.println(result.getProducerRecord().value());
             }
         });
     }
 
+    // consumer
     @Transactional(rollbackFor = Exception.class)
     @KafkaListener(topics = "countries-topic", groupId = "country-group")
     public void consumeCountry(KafkaCountries country) {
@@ -52,30 +52,29 @@ public class KafkaService {
         log.info("Received message: {}", country);
     }
 
-//    4th endpoint (onboarding project)
     public KafkaCountries getCountry(String countryName) {
         return kafkaCountriesRepo.findByName(countryName);
     }
 
-//    second attempt
-//    sending to kafka and then consuming from kafka
+    // producer and consumer & save country to mongo
     @Transactional(rollbackFor = Exception.class)
-    public void sendCountryToKafka(KafkaCountries country) throws InterruptedException {
-        SendResult<String, Country> res = kafka.send("new-topic", country).join();
-        System.out.println("sent");
+    public void sendCountryToKafka(KafkaCountries country) {
+        SendResult<String, Country> res = kafka.send("countries-topic-2", country).join();
+//        System.out.println("sent");
         log.info("Message sent successfully. Offset: {}", res.getRecordMetadata().offset());
-        Thread.sleep(5000);
+//        Thread.sleep(5000);
         ConsumerRecord<String, Country> record
                 = new ConsumerRecord<String, Country>("countries-topic-2", res.getRecordMetadata().partition(), res.getRecordMetadata().offset(), res.getProducerRecord().key(), res.getProducerRecord().value());
         consumer.processRecord(record);
-        System.out.println("consumed");
-        Thread.sleep(5000);
+//        System.out.println("consumed");
+//        Thread.sleep(5000);
         kafkaCountriesRepo.save(country);
-        System.out.println("saved");
-        Thread.sleep(1000);
+//        System.out.println("saved");
+//        Thread.sleep(1000);
     }
 
-//    testing transactional
+    /*
+    // testing transactional
     @Transactional
     public String forLoop(List<KafkaCountries> d) throws InterruptedException {
         for(KafkaCountries c : d) {
@@ -85,5 +84,5 @@ public class KafkaService {
         }
         return "Done";
     }
-
+    */
 }

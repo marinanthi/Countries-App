@@ -10,6 +10,7 @@ import java.io.Serializable;
 import java.time.Instant;
 
 @Data
+@Builder
 @Getter
 @Setter
 @NoArgsConstructor
