@@ -37,30 +37,15 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@Testcontainers
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest
+@AutoConfigureMockMvc
 class RedisCacheControllerTest {
-
-    @Container @ServiceConnection
-    static MongoDBContainer mongo = new MongoDBContainer("mongo:7");
-
-    @Container @ServiceConnection
-    static KafkaContainer kafka = new KafkaContainer("apache/kafka-native:3.8.0");
-
-    @Container
-    public static GenericContainer redis = new GenericContainer(DockerImageName.parse("docker.io/redis/redis-stack"))
-            .withExposedPorts(6379);
-    @Autowired
-    private MockMvc mockMvc;
-
-    @DynamicPropertySource
-    static void redisProps(DynamicPropertyRegistry registry) {
-        registry.add("spring.data.redis.host", redis::getHost);
-        registry.add("spring.data.redis.port", () -> redis.getFirstMappedPort());
-    }
 
     @MockitoBean
     RedisCacheService redisCacheService;
+
+    @Autowired
+    MockMvc mockMvc;
 
     // GET /findByCapital/{capitalName}
     @Test

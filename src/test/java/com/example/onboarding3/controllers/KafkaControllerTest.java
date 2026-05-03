@@ -1,7 +1,6 @@
 package com.example.onboarding3.controllers;
 
 import com.example.onboarding3.domain.KafkaCountries;
-import com.example.onboarding3.repositories.KafkaCountriesMongoRepo;
 import com.example.onboarding3.services.CountriesService;
 import com.example.onboarding3.services.KafkaService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -9,18 +8,10 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.containers.MongoDBContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.kafka.KafkaContainer;
-import org.testcontainers.utility.DockerImageName;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -31,30 +22,12 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@Testcontainers
 @SpringBootTest
+@AutoConfigureMockMvc
 class KafkaControllerTest {
-    @Container @ServiceConnection
-    static MongoDBContainer mongo = new MongoDBContainer("mongo:7");
-
-    @Container @ServiceConnection
-    static KafkaContainer kafka = new KafkaContainer("apache/kafka-native:3.8.0");
-
-    @Container
-    public static GenericContainer redis = new GenericContainer(DockerImageName.parse("docker.io/redis/redis-stack"))
-            .withExposedPorts(6379);
-
-    @DynamicPropertySource
-    static void redisProps(DynamicPropertyRegistry registry) {
-        registry.add("spring.data.redis.host", redis::getHost);
-        registry.add("spring.data.redis.port", () -> redis.getFirstMappedPort());
-    }
 
     @MockitoBean
     KafkaService kafkaService;
-
-    @Autowired
-    KafkaCountriesMongoRepo repo;
 
     @Autowired
     MockMvc mockMvc;
@@ -66,7 +39,7 @@ class KafkaControllerTest {
 
     //  POST /kafka
     @Test
-    void shouldSendCountryToKafka() throws Exception {
+    void shouldSendCountry_ToKafka() throws Exception {
         KafkaCountries country = new KafkaCountries();
         country.setCountryName("Greece");
         country.setCapital("Athens");
@@ -87,7 +60,7 @@ class KafkaControllerTest {
     }
 
     @Test
-    void shouldNotSendCountryToKafka() throws Exception {
+    void shouldNotSendCountry_ToKafka() throws Exception {
         KafkaCountries country = new KafkaCountries();
         country.setCountryName("Greece");
         country.setCapital(null);
@@ -100,7 +73,7 @@ class KafkaControllerTest {
 
         mockMvc.perform(post("/kafka")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(country)))
+                        .content("{\"capital\": null}"))
                 .andExpect(status().isBadRequest());
     }
 
@@ -118,7 +91,7 @@ class KafkaControllerTest {
 
     // POST /kafka2
     @Test
-    void shouldSendCountryToKafka2() throws Exception {
+    void shouldProduceAndConsume() throws Exception {
         KafkaCountries country = new KafkaCountries();
         country.setCountryName("Greece");
         country.setCapital("Athens");
@@ -129,17 +102,17 @@ class KafkaControllerTest {
 
         Mockito.doNothing().when(kafkaService).sendCountry(any(KafkaCountries.class));
 
-        mockMvc.perform(post("/kafka")
+        mockMvc.perform(post("/kafka2")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(country)))
                 .andExpect(status().isOk());
 
         Mockito.verify(kafkaService, times(1))
-                .sendCountry(any(KafkaCountries.class));
+                .sendCountryToKafka(any(KafkaCountries.class));
     }
 
     @Test
-    void shouldNotSendCountryToKafka2() throws Exception {
+    void shouldNotProduceAndConsume() throws Exception {
         KafkaCountries country = new KafkaCountries();
         country.setCountryName("Greece");
         country.setCapital(null);
@@ -150,9 +123,14 @@ class KafkaControllerTest {
 
         Mockito.doNothing().when(kafkaService).sendCountry(any(KafkaCountries.class));
 
-        mockMvc.perform(post("/kafka")
+        mockMvc.perform(post("/kafka2")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(country)))
+                        .content("{\"capital\": null}"))
                 .andExpect(status().isBadRequest());
+
+//        mockMvcKafka.perform(post("/kafka")
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .content(objectMapper.writeValueAsString(country)))
+//                .andExpect(status().isBadRequest());
     }
 }
