@@ -5,11 +5,14 @@ import com.example.onboarding3.domain.KafkaCountries;
 import com.example.onboarding3.kafka.IdempotentConsumer;
 import com.example.onboarding3.repositories.KafkaCountriesMongoRepo;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.clients.producer.RecordMetadata;
+import org.apache.kafka.common.TopicPartition;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
@@ -24,12 +27,14 @@ import org.testcontainers.kafka.KafkaContainer;
 import org.testcontainers.shaded.org.checkerframework.checker.units.qual.A;
 import org.testcontainers.utility.DockerImageName;
 
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest
+//@WebMvcTest(KafkaService.class)
 @Testcontainers
 class KafkaServiceTest {
     @Container @ServiceConnection
@@ -60,15 +65,12 @@ class KafkaServiceTest {
     @MockitoBean
     private KafkaTemplate<String, Country> kafkaTemplate;
 
-//    @Test
-//    void sendsCountryToKafka() {
-//        KafkaCountries country = new KafkaCountries("Greece", "GR", "Athens", "Europe", "Greek", "euro");
-//        CompletableFuture<SendResult<String, KafkaCountries>> future = new CompletableFuture<>();
-//        Mockito.when(kafkaTemplate.send("countries", country)).thenReturn();
-//        kafkaService.sendCountry(country);
-//
-//        verify(kafkaTemplate, times(1)).send("country", country);
-//    }
+    @Test
+    void sendCountryTest() {
+        when(kafkaTemplate.send(anyString(), any()))
+                .thenReturn(new CompletableFuture<>());
+        kafkaService.sendCountry(new KafkaCountries());
+    }
 
     @Test
     void consumesCountryAndSavesToDatabase() throws InterruptedException {
@@ -82,11 +84,29 @@ class KafkaServiceTest {
     @Test
     void sendsConsumesAndSavesCountry() throws InterruptedException {
         KafkaCountries greece = new KafkaCountries("Greece", "GR", "Athens", "Europe", "Greek", "euro");
-//        CompletableFuture<SendResult<String, KafkaCountries>> future = CompletableFuture.supplyAsync(() -> new SendResult<String, KafkaCountries>());
-//        Mockito.when(kafkaTemplate.send("country", greece)).thenReturn();
-        kafkaService.sendCountryToKafka(greece);
+        ProducerRecord<String, Country> producerRecord =
+                new ProducerRecord<>("countries-topic-2", "key", new Country());
 
-//        verify(kafkaTemplate, times(1)).send("country", greece);
-//        verify(kafkaCountriesRepo, times(1)).save(greece);
+        RecordMetadata metadata = new RecordMetadata(
+                new TopicPartition("countries-topic-2", 0),
+                0,   // baseOffset
+                123, // offset
+                System.currentTimeMillis(),
+               0,
+                0
+        );
+
+        SendResult<String, Country> sendResult =
+                new SendResult<>(producerRecord, metadata);
+
+        when(kafkaTemplate.send(anyString(), any()))
+                .thenReturn(CompletableFuture.completedFuture(sendResult));
+
+        kafkaService.sendCountryToKafka(greece);
+        Thread.sleep(2000);
+
+        verify(kafkaCountriesRepo, times(1)).save(greece);
+        verify(kafkaTemplate, times(1)).send(anyString(), any());
+        verify(consumer, times(1)).processRecord(any());
     }
 }
