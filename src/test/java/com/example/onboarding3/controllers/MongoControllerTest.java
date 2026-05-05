@@ -2,12 +2,11 @@ package com.example.onboarding3.controllers;
 
 import com.example.onboarding3.domain.CountriesCache;
 
+import com.example.onboarding3.services.BaseIntTestClass;
 import com.example.onboarding3.services.CountriesService;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -16,13 +15,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-
-@SpringBootTest
-@AutoConfigureMockMvc
-public class MongoControllerTest {
+public class MongoControllerTest extends BaseIntTestClass{
 
     @Autowired
-    MockMvc mockMvc;
+    MockMvc mockMvcMongo;
 
     @MockitoBean
     CountriesService countriesService;
@@ -31,7 +27,7 @@ public class MongoControllerTest {
     @Test
     void testByCapitalSuccess() throws Exception{
         Mockito.when(countriesService.findByCapital("Athens")).thenReturn(new CountriesCache("Greece", "GR", "Athens", "Europe", "Greek", "euro"));
-        mockMvc.perform(get("/capital/Athens"))
+        mockMvcMongo.perform(get("/capital/Athens"))
                 .andExpectAll(
                         status().isOk(),
                         jsonPath("$.countryName").isNotEmpty(),
@@ -52,7 +48,7 @@ public class MongoControllerTest {
         Mockito.when(countriesService.findByCapital(anyString()))
                 .thenReturn(country);
 
-        mockMvc.perform(get("/capital/Athens"))
+        mockMvcMongo.perform(get("/capital/Athens"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.countryName").value("Greece"))
                 .andExpect(jsonPath("$.capital").value("Athens"))
@@ -68,7 +64,7 @@ public class MongoControllerTest {
     @Test
     void testByNameSuccess() throws Exception{
         Mockito.when(countriesService.findByName("Greece")).thenReturn(new CountriesCache("Greece", "GR", "Athens", "Europe", "Greek", "euro"));
-        mockMvc.perform(get("/country?countryName=Greece"))
+        mockMvcMongo.perform(get("/country?countryName=Greece"))
                 .andExpectAll(
                         status().isOk(),
                         jsonPath("$.countryName").isNotEmpty(),

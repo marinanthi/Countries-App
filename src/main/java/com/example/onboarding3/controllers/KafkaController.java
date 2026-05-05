@@ -1,20 +1,14 @@
 package com.example.onboarding3.controllers;
 
-import com.example.onboarding3.domain.Country;
 import com.example.onboarding3.domain.KafkaCountries;
-import com.example.onboarding3.services.CountriesService;
 import com.example.onboarding3.services.KafkaService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 import java.util.ArrayList;
 
 @RestController
-//@RequestMapping("/kafka")
 public class KafkaController {
 
     private final KafkaService kafkaService;
@@ -22,15 +16,6 @@ public class KafkaController {
     public KafkaController(KafkaService kafkaService) {
         this.kafkaService = kafkaService;
     }
-
-//    @Autowired
-//    private CountriesService countriesService;
-//
-//    @GetMapping("/capital/{capitalName}")
-//    public Country byCapital(@PathVariable String capitalName) {
-//        System.out.println("Searching country based on capital...");
-//        return countriesService.findByCapital(capitalName);
-//    }
 
     //    project endpoint 3
     @PostMapping(path ="/kafka", consumes = "application/json")
@@ -50,7 +35,7 @@ public class KafkaController {
     }
 
     @PostMapping(path ="/kafka2", consumes = "application/json")
-    public void send(@Valid @RequestBody KafkaCountries country) {
+    public void produceAndConsume(@Valid @RequestBody KafkaCountries country) {
         kafkaService.sendCountryToKafka(country);
     }
 

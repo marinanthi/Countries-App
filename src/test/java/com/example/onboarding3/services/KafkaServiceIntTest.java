@@ -7,51 +7,18 @@ import com.example.onboarding3.repositories.KafkaCountriesMongoRepo;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.TopicPartition;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
-import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
-import org.springframework.http.HttpStatus;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.containers.MongoDBContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.kafka.KafkaContainer;
-import org.testcontainers.shaded.org.checkerframework.checker.units.qual.A;
-import org.testcontainers.utility.DockerImageName;
-
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@SpringBootTest
-//@WebMvcTest(KafkaService.class)
-@Testcontainers
-class KafkaServiceTest {
-    @Container @ServiceConnection
-    static MongoDBContainer mongo = new MongoDBContainer("mongo:7");
-
-    @Container @ServiceConnection
-    static KafkaContainer kafka = new KafkaContainer("apache/kafka-native:3.8.0");
-
-    @Container
-    public static GenericContainer redis = new GenericContainer(DockerImageName.parse("docker.io/redis/redis-stack"))
-            .withExposedPorts(6379);
-
-    @DynamicPropertySource
-    static void redisProps(DynamicPropertyRegistry registry) {
-        registry.add("spring.data.redis.host", redis::getHost);
-        registry.add("spring.data.redis.port", () -> redis.getFirstMappedPort());
-    }
+class KafkaServiceIntTest extends BaseIntTestClass {
 
     @Autowired
     KafkaService kafkaService;
@@ -65,10 +32,17 @@ class KafkaServiceTest {
     @MockitoBean
     private KafkaTemplate<String, Country> kafkaTemplate;
 
+    @Autowired
+    private MongoTemplate mongoTemplate;
+
+    @BeforeEach
+    void clearMongo() {
+        mongoTemplate.getDb().drop();
+    }
+
     @Test
     void sendCountryTest() {
-        when(kafkaTemplate.send(anyString(), any()))
-                .thenReturn(new CompletableFuture<>());
+        when(kafkaTemplate.send(anyString(), any())).thenReturn(new CompletableFuture<>());
         kafkaService.sendCountry(new KafkaCountries());
     }
 

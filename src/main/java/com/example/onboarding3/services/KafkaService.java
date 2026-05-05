@@ -31,7 +31,6 @@ public class KafkaService {
     }
 
     // producer
-    @Transactional
     public void sendCountry(KafkaCountries country) {
         CompletableFuture<SendResult<String, Country>> future = kafka.send("countries-topic", country);
         future.whenComplete((result, exception) -> {

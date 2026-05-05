@@ -1,19 +1,17 @@
 package com.example.onboarding3.controllers;
 
 import com.example.onboarding3.domain.KafkaCountries;
+import com.example.onboarding3.services.BaseIntTestClass;
 import com.example.onboarding3.services.CountriesService;
 import com.example.onboarding3.services.KafkaService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
@@ -22,15 +20,13 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
-@AutoConfigureMockMvc
-class KafkaControllerTest {
+class KafkaControllerTest extends BaseIntTestClass {
 
     @MockitoBean
     KafkaService kafkaService;
 
     @Autowired
-    MockMvc mockMvc;
+    MockMvc mockMvcKafka;
 
     @MockitoBean
     CountriesService countriesService;
@@ -50,7 +46,7 @@ class KafkaControllerTest {
 
         Mockito.doNothing().when(kafkaService).sendCountry(any(KafkaCountries.class));
 
-        mockMvc.perform(post("/kafka")
+        mockMvcKafka.perform(post("/kafka")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(country)))
                 .andExpect(status().isOk());
@@ -71,7 +67,7 @@ class KafkaControllerTest {
 
         Mockito.doNothing().when(kafkaService).sendCountry(any(KafkaCountries.class));
 
-        mockMvc.perform(post("/kafka")
+        mockMvcKafka.perform(post("/kafka")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"capital\": null}"))
                 .andExpect(status().isBadRequest());
@@ -81,7 +77,7 @@ class KafkaControllerTest {
     @Test
     void shouldReturnCountry_fromDatabase() throws Exception {
         Mockito.when(kafkaService.getCountry("Greece")).thenReturn(new KafkaCountries("Greece", "GR", "Athens", "Europe", "Greek", "euro"));
-        mockMvc.perform(get("/kafka/Greece"))
+        mockMvcKafka.perform(get("/kafka/Greece"))
                 .andExpectAll(
                         status().isOk(),
                         jsonPath("$[0].countryName").isNotEmpty(),
@@ -102,7 +98,7 @@ class KafkaControllerTest {
 
         Mockito.doNothing().when(kafkaService).sendCountry(any(KafkaCountries.class));
 
-        mockMvc.perform(post("/kafka2")
+        mockMvcKafka.perform(post("/kafka2")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(country)))
                 .andExpect(status().isOk());
@@ -123,7 +119,7 @@ class KafkaControllerTest {
 
         Mockito.doNothing().when(kafkaService).sendCountry(any(KafkaCountries.class));
 
-        mockMvc.perform(post("/kafka2")
+        mockMvcKafka.perform(post("/kafka2")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"capital\": null}"))
                 .andExpect(status().isBadRequest());

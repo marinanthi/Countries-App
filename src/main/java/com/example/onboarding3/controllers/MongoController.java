@@ -5,12 +5,11 @@ import com.example.onboarding3.services.CountriesService;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-//@RequestMapping("/countries")
-public class Controller {
+public class MongoController {
 
     private final CountriesService countriesService;
 
-    public Controller(CountriesService countriesService) {
+    public MongoController(CountriesService countriesService) {
         this.countriesService = countriesService;
     }
 

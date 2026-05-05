@@ -6,59 +6,18 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
-import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.cache.CacheManager;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.containers.MongoDBContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.kafka.KafkaContainer;
-import org.testcontainers.utility.DockerImageName;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-@SpringBootTest
-@Testcontainers
-//@WebMvcTest(RedisCacheService.class)
-class RedisCacheServiceTest {
-//    DockerImageName myMongoImage = DockerImageName.parse("docker.io/mongodb/mongodb-community-server").asCompatibleSubstituteFor("apache/kafka");
-
-    @Container @ServiceConnection
-    static MongoDBContainer mongo = new MongoDBContainer("mongo:7");
-
-    @Container @ServiceConnection
-    static KafkaContainer kafka = new KafkaContainer("apache/kafka-native:3.8.0");
-
-    @Container
-    public static GenericContainer redis = new GenericContainer(DockerImageName.parse("docker.io/redis/redis-stack"))
-            .withExposedPorts(6379);
+class RedisCacheServiceIntTest extends BaseIntTestClass {
 
     @Autowired
     private RedisTemplate<Object, Object> redisTemplate;
-
-    @DynamicPropertySource
-    static void redisProps(DynamicPropertyRegistry registry) {
-        registry.add("spring.data.redis.host", redis::getHost);
-        registry.add("spring.data.redis.port", () -> redis.getFirstMappedPort());
-    }
-
-//    @BeforeEach
-//    public void setUp() {
-//        String address = redis.getHost();
-//        Integer port = redis.getFirstMappedPort();
-//
-//        System.setProperty("spring.redis.host", address);
-//        System.setProperty("spring.redis.port", port.toString());
-//    }
 
     @Autowired
     RedisCacheService redisService;
@@ -71,8 +30,6 @@ class RedisCacheServiceTest {
 
     @BeforeEach
     void clearCacheBetweenTests() {
-//        cacheManager.getCacheNames()
-//                .forEach(name -> cacheManager.getCache(name).clear());
         redisTemplate.getConnectionFactory().getConnection().flushAll();
     }
 
@@ -109,6 +66,7 @@ class RedisCacheServiceTest {
                 new CountriesCache("Greece", "GR", "Athens", "Europe", "Greek", "euro");
         Mockito.when(restCountries.getByCapital("Athens")).thenReturn(greece);
 
+        redisService.getByCapital("Athens");
         redisService.getByCapital("Athens");
 
         // Verify the value really sits in the Redis-backed Spring cache.

@@ -24,25 +24,20 @@ import org.testcontainers.utility.DockerImageName;
 @Configuration
 public class TestConfig {
 
-//    @Bean
-//    MockMvc mockMvc(Controller controller) {
-//        return MockMvcBuilders.standaloneSetup(controller).build();
-//    }
-//
-//    @Bean
-//    MockMvc mockMvcKafka(KafkaController kafkaController) {
-//        return MockMvcBuilders.standaloneSetup(kafkaController).build();
-//    }
-//
-//    @Bean
-//    MockMvc mockMvcMongo(MongoController mongoController) {
-//        return MockMvcBuilders.standaloneSetup(mongoController).build();
-//    }
-//
-//    @Bean
-//    MockMvc mockMvcRedis(RedisCacheController redisController) {
-//        return MockMvcBuilders.standaloneSetup(redisController).build();
-//    }
+    @Bean
+    MockMvc mockMvcKafka(KafkaController kafkaController) {
+        return MockMvcBuilders.standaloneSetup(kafkaController).build();
+    }
+
+    @Bean
+    MockMvc mockMvcMongo(MongoController mongoController) {
+        return MockMvcBuilders.standaloneSetup(mongoController).build();
+    }
+
+    @Bean
+    MockMvc mockMvcRedis(RedisCacheController redisController) {
+        return MockMvcBuilders.standaloneSetup(redisController).build();
+    }
 
 //    @Bean
 //    TestRestTemplate restTemplateTest() {
